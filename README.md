@@ -9,7 +9,7 @@ An AI-powered Applicant Tracking System (ATS) analyzer built with **FastAPI**, *
 ![AI Resume & Job Match Agent Preview](assets/resume-matcher-agent.png)
 
 ---
-gi
+
 ## Key Features
 
 - **Multi-Format Resume Parsing:** Extracts text cleanly in-memory from `PDF`, `DOCX`, and `TXT` files without persisting user documents to disk.
