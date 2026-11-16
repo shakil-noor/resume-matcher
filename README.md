@@ -4,11 +4,9 @@ An AI-powered Applicant Tracking System (ATS) analyzer built with **FastAPI**, *
 
 ---
 
-# AI Resume & Job Match Agent
+# AI Resume & Job Match Agent Demo Image
 
-An AI-powered Applicant Tracking System (ATS) analyzer built with **FastAPI**, **Google GenAI SDK (Gemini)**, and **Pydantic**...
-
-![AI Resume & Job Match Agent Preview](assets/resume-matcher-agent.PNG)
+![AI Resume & Job Match Agent Preview](assets/resume-matcher-agent.png)
 
 ---
 
