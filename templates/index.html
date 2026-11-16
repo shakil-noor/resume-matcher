@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume & Job Match Agent</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f9;
+        }
+
+        .score-circle {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0 auto;
+        }
+
+        .badge-skill {
+            font-size: 0.9rem;
+            padding: 0.5em 0.8em;
+            margin: 0.25rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container py-5" style="max-width: 960px;">
+        <div class="text-center mb-4">
+            <h1 class="fw-bold">AI Resume & Job Match Agent</h1>
+            <p class="text-muted">Upload your resume and provide a job link or description to get an ATS gap analysis.
+            </p>
+        </div>
+
+        <!-- Input Form -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4">
+                <form id="matchForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">1. Upload Resume (PDF, DOCX, or TXT)</label>
+                        <input type="file" class="form-control" id="resume_file" name="resume_file"
+                            accept=".pdf,.docx,.doc,.txt" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">2. Job Post URL (Public Career Pages / Greenhouse /
+                            Lever)</label>
+                        <input type="url" class="form-control" id="job_url" name="job_url"
+                            placeholder="https://boards.greenhouse.io/company/jobs/12345">
+                        <div class="form-text">Note: LinkedIn blocks automated scrapers. If using LinkedIn, paste the
+                            job text below.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">3. Or Paste Job Description Text (Recommended for
+                            LinkedIn)</label>
+                        <textarea class="form-control" id="job_text" name="job_text" rows="5"
+                            placeholder="Paste the full job responsibilities and requirements here..."></textarea>
+                    </div>
+
+                    <div id="errorAlert" class="alert alert-danger d-none" role="alert"></div>
+
+                    <button type="submit" id="submitBtn" class="btn btn-primary btn-lg w-100 fw-semibold">
+                        Analyze Match
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="text-center my-5 d-none">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+            <p class="mt-3 fw-semibold text-secondary">Analyzing skills, keywords, and ATS alignment...</p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="d-none">
+            <!-- Score & Summary -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center mb-3 mb-md-0">
+                            <div id="scoreCircle" class="score-circle bg-success">0%</div>
+                            <div class="small text-muted mt-2 fw-semibold">MATCH SCORE</div>
+                        </div>
+                        <div class="col-md-9">
+                            <h4 class="fw-bold mb-2">Executive Assessment</h4>
+                            <p id="execSummary" class="mb-0 text-secondary"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Matches vs Gaps -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-success text-white fw-bold">Where You Match</div>
+                        <div class="card-body" id="matchedSkills"></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-danger text-white fw-bold">Missing Keywords & Gaps</div>
+                        <div class="card-body" id="missingGaps"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Strategic Improvements -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-dark text-white fw-bold">Where You Need to Improve</div>
+                <div class="card-body">
+                    <ul id="improvementList" class="mb-0"></ul>
+                </div>
+            </div>
+
+            <!-- Tailored Bullet Rewrites -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white fw-bold">Suggested Resume Bullet Rewrites</div>
+                <div class="card-body" id="bulletRewrites"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('matchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errorAlert = document.getElementById('errorAlert');
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const submitBtn = document.getElementById('submitBtn');
+
+            errorAlert.classList.add('d-none');
+            results.classList.add('d-none');
+            loading.classList.remove('d-none');
+            submitBtn.disabled = true;
+
+            const formData = new FormData(e.target);
+
+            try {
+                const res = await fetch('/analyze', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.detail || 'Something went wrong.');
+                }
+
+                // Render Score
+                const scoreCircle = document.getElementById('scoreCircle');
+                scoreCircle.textContent = `${data.match_score}%`;
+                scoreCircle.className = 'score-circle ' + (
+                    data.match_score >= 75 ? 'bg-success' :
+                        data.match_score >= 50 ? 'bg-warning text-dark' : 'bg-danger'
+                );
+
+                document.getElementById('execSummary').textContent = data.executive_summary;
+
+                // Render Matched Skills
+                document.getElementById('matchedSkills').innerHTML = data.matched_skills
+                    .map(s => `<span class="badge bg-success-subtle text-success-emphasis border border-success badge-skill">${s}</span>`)
+                    .join('');
+
+                // Render Missing Gaps
+                document.getElementById('missingGaps').innerHTML = data.missing_gaps
+                    .map(g => `<span class="badge bg-danger-subtle text-danger-emphasis border border-danger badge-skill">${g}</span>`)
+                    .join('');
+
+                // Render Improvements
+                document.getElementById('improvementList').innerHTML = data.improvement_areas
+                    .map(item => `<li class="mb-2">${item}</li>`)
+                    .join('');
+
+                // Render Rewrites
+                document.getElementById('bulletRewrites').innerHTML = data.bullet_rewrites
+                    .map(b => `
+                <div class="border-start border-4 border-primary ps-3 mb-3">
+                    <div class="small text-muted fw-semibold">Focus: ${b.original_context}</div>
+                    <div class="mt-1 fw-medium">${b.suggested_bullet}</div>
+                </div>
+            `).join('');
+
+                results.classList.remove('d-none');
+            } catch (err) {
+                errorAlert.textContent = err.message;
+                errorAlert.classList.remove('d-none');
+            } finally {
+                loading.classList.add('d-none');
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>
