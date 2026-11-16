@@ -4,6 +4,14 @@ An AI-powered Applicant Tracking System (ATS) analyzer built with **FastAPI**, *
 
 ---
 
+# AI Resume & Job Match Agent
+
+An AI-powered Applicant Tracking System (ATS) analyzer built with **FastAPI**, **Google GenAI SDK (Gemini)**, and **Pydantic**...
+
+![AI Resume & Job Match Agent Preview](assets/resume-matcher-agent.PNG)
+
+---
+
 ## Key Features
 
 - **Multi-Format Resume Parsing:** Extracts text cleanly in-memory from `PDF`, `DOCX`, and `TXT` files without persisting user documents to disk.
@@ -36,7 +44,7 @@ An AI-powered Applicant Tracking System (ATS) analyzer built with **FastAPI**, *
 
 1. **Clone the repository**
    ```bash
-   git clone [https://github.com/shakil-noor/resume-matcher.git](https://github.com/shakil-noor/resume-matcher.git)
+   git clone https://github.com/shakil-noor/resume-matcher.git
    cd resume-matcher
 
 2. **Create a virtual environment & install dependencies**
