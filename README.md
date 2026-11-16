@@ -36,6 +36,14 @@ An AI-powered Applicant Tracking System (ATS) analyzer built with **FastAPI**, *
 
 ---
 
+## Prerequisites
+
+- **Google Gemini API Key** — Get a free key from [Google AI Studio](https://aistudio.google.com/)
+- **Option 1 (For Local Run Must Install Python):** [Python 3.10+](https://www.python.org/downloads/)
+- **Option 2 (For Container Run Must Install Docker):** [Docker](https://docs.docker.com/get-docker/)
+
+---
+
 ## Quick Start
 
 ### Option 1: Run Locally with Python
